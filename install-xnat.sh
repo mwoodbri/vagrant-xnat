@@ -1,24 +1,12 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 DEPS=$1
 OWNER=$2
 GROUP=$3
 XNAT_DATA=$4
 
-RULENUM=$(iptables -L INPUT --line-numbers | grep 'REJECT' | awk '{print $1}')
-iptables -I INPUT $RULENUM -m state --state NEW -m tcp -p tcp --dport 8080 -j ACCEPT
-service iptables save
-
-yum install -y postgresql-server
-service postgresql initdb
-sed -i 's/ident$/trust/' /var/lib/pgsql/data/pg_hba.conf
-service postgresql start
-createuser -U postgres -S -D -R xnat01
-createdb -U postgres -O xnat01 xnat
-createlang -U postgres -d xnat plpgsql
-
 if [ ! -f $DEPS/server-jre-7u51-linux-x64.tar.gz ]; then
-	echo 'Please download server-jre-7u51-linux-x64.tar.gz and place it this directory'
+	echo 'Please download server-jre-7u51-linux-x64.tar.gz from http://www.oracle.com/technetwork/java/javase/downloads/index.html and place it in this directory' >&2
 	exit 1
 fi
 tar xf $DEPS/server-jre-7u51-linux-x64.tar.gz -C /opt
@@ -42,6 +30,14 @@ mkdir $XNAT_DATA
 
 ln -s $DEPS/build.properties $XNAT_HOME
 
+yum install -y postgresql-server
+service postgresql initdb
+sed -i 's/ident$/trust/' /var/lib/pgsql/data/pg_hba.conf
+service postgresql start
+createuser -U postgres -S -D -R xnat01
+createdb -U postgres -O xnat01 xnat
+createlang -U postgres -d xnat plpgsql
+
 cd $XNAT_HOME
 export PATH=$JAVA_HOME/bin:$PATH
 bin/setup.sh -Ddeploy=true
@@ -52,5 +48,9 @@ $XNAT_HOME/bin/StoreXML -l security/security.xml -allowDataDeletion true
 $XNAT_HOME/bin/StoreXML -dir ./work/field_groups -u admin -p admin -allowDataDeletion true
 
 chown -R $OWNER.$GROUP $XNAT_HOME $TOMCAT_HOME $XNAT_DATA
+
+RULENUM=$(iptables -L INPUT --line-numbers | grep 'REJECT' | awk '{print $1}')
+iptables -I INPUT $RULENUM -m state --state NEW -m tcp -p tcp --dport 8080 -j ACCEPT
+service iptables save
 
 su $OWNER $TOMCAT_HOME/bin/startup.sh
