@@ -5,13 +5,6 @@ OWNER=$2
 GROUP=$3
 XNAT_DATA=$4
 
-if [ ! -f $DEPS/server-jre-7u51-linux-x64.tar.gz ]; then
-	echo 'Please download server-jre-7u51-linux-x64.tar.gz from http://www.oracle.com/technetwork/java/javase/downloads/index.html and place it in this directory' >&2
-	exit 1
-fi
-tar xf $DEPS/server-jre-7u51-linux-x64.tar.gz -C /opt
-export JAVA_HOME=/opt/jdk1.7.0_51
-
 if [ ! -f $DEPS/apache-tomcat-7.0.52.tar.gz ]; then
 	cd $DEPS
 	curl -O http://www.mirrorservice.org/sites/ftp.apache.org/tomcat/tomcat-7/v7.0.52/bin/apache-tomcat-7.0.52.tar.gz
@@ -38,8 +31,10 @@ createuser -U postgres -S -D -R xnat01
 createdb -U postgres -O xnat01 xnat
 createlang -U postgres -d xnat plpgsql
 
+yum install -y java-1.7.0-openjdk-devel
+export JAVA_HOME=/usr/lib/jvm/java
+
 cd $XNAT_HOME
-export PATH=$JAVA_HOME/bin:$PATH
 bin/setup.sh -Ddeploy=true
 
 cd $XNAT_HOME/deployments/xnat

@@ -1,5 +1,5 @@
-XNAT installer (Vagrant)
-========================
+Install XNAT using Vagrant
+==========================
 
 To automatically setup XNAT:
 
