@@ -24,16 +24,16 @@ mkdir $XNAT_DATA
 
 ln -s $DEPS/build.properties $XNAT_HOME
 
-yum install -y postgresql-server
-service postgresql initdb
-sed -i 's/ident$/trust/' /var/lib/pgsql/data/pg_hba.conf
-service postgresql start
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get -y install postgresql-8.4
+sed -i 's/ident$\|md5$/trust/' /etc/postgresql/8.4/main/pg_hba.conf
+/etc/init.d/postgresql reload
 createuser -U postgres -S -D -R xnat01
 createdb -U postgres -O xnat01 xnat
 createlang -U postgres -d xnat plpgsql
 
-yum install -y java-1.7.0-openjdk-devel
-export JAVA_HOME=/usr/lib/jvm/java
+apt-get install -y openjdk-7-jdk
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
 
 cd $XNAT_HOME
 bin/setup.sh -Ddeploy=true
@@ -52,9 +52,5 @@ if [ "$EXT" = "true" ]; then
 fi
 
 chown -R $OWNER.$GROUP $XNAT_HOME $TOMCAT_HOME $XNAT_DATA
-
-RULENUM=$(iptables -L INPUT --line-numbers | grep 'REJECT' | awk '{print $1}')
-iptables -I INPUT $RULENUM -m state --state NEW -m tcp -p tcp --dport 8080 -j ACCEPT
-service iptables save
 
 su $OWNER $TOMCAT_HOME/bin/startup.sh

@@ -4,8 +4,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "CentOS-6.5"
-  config.vm.box_url = "http://cisbic.bioinformatics.ic.ac.uk/files/dhcp/CentOS-6.5.box"
+  config.vm.box = "hashicorp/precise64"
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
