@@ -13,11 +13,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
   config.vm.provision "shell" do |s|
     s.path = "install-xnat.sh"
-<<<<<<< HEAD
-    s.args = ["/vagrant", "vagrant", "/var/lib/XNAT", "false"]
-=======
-    s.args = ["/vagrant", "/var/lib/XNAT", "false"]
->>>>>>> Ubuntu 14.04
+    s.args = ["/vagrant", "xnat", "/var/lib/XNAT", "false"]
   end
   config.vm.network "forwarded_port", guest: 8080, host: 8080
 end
