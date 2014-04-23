@@ -1,10 +1,13 @@
-#!/bin/bash -eu
+#!/bin/bash -eux
 
 DEPS=$1
-OWNER=$2
-GROUP=$3
-XNAT_DATA=$4
-EXT=$5
+XNAT_DATA=$2
+EXT=$3
+
+OWNER=xnat01
+PASSWORD=xnat01
+
+sudo adduser --system --no-create-home $OWNER
 
 if [ ! -f $DEPS/apache-tomcat-7.0.53.tar.gz ]; then
 	cd $DEPS
@@ -25,19 +28,18 @@ mkdir $XNAT_DATA
 ln -s $DEPS/build.properties $XNAT_HOME
 
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get -y install postgresql-8.4
-sed -i 's/ident$\|md5$/trust/' /etc/postgresql/8.4/main/pg_hba.conf
-/etc/init.d/postgresql reload
-createuser -U postgres -S -D -R xnat01
-createdb -U postgres -O xnat01 xnat
-createlang -U postgres -d xnat plpgsql
+
+apt-get -y install postgresql-9.3
+sudo -u postgres psql -c "CREATE ROLE $OWNER PASSWORD '$PASSWORD' NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;"
+sudo -u postgres createdb -O $OWNER xnat
 
 apt-get install -y openjdk-7-jdk
 export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
 
 cd $XNAT_HOME
 bin/setup.sh -Ddeploy=true
-psql -d xnat -f $XNAT_HOME/deployments/xnat/sql/xnat.sql -U xnat01
+exit 0
+sudo -u $OWNER psql -d xnat <$XNAT_HOME/deployments/xnat/sql/xnat.sql
 
 cd $XNAT_HOME/deployments/xnat
 $XNAT_HOME/bin/StoreXML -l security/security.xml -allowDataDeletion true
@@ -48,9 +50,9 @@ if [ "$EXT" = "true" ]; then
 	sed -i 's/<!--\(<Data_Model .*\/>\)-->/\1/' $XNAT_HOME/projects/xnat/InstanceSettings.xml
 	cd $XNAT_HOME
 	bin/update.sh -Ddeploy=true
-	psql -d xnat -f $XNAT_HOME/deployments/xnat/sql/xnat-update.sql -U xnat01
+	sudo -u $OWNER psql -d xnat <$XNAT_HOME/deployments/xnat/sql/xnat-update.sql
 fi
 
-chown -R $OWNER.$GROUP $XNAT_HOME $TOMCAT_HOME $XNAT_DATA
+chown -R $OWNER $XNAT_HOME $TOMCAT_HOME $XNAT_DATA
 
-su $OWNER $TOMCAT_HOME/bin/startup.sh
+sudo -u $OWNER $TOMCAT_HOME/bin/startup.sh
