@@ -9,6 +9,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+  end
   config.vm.provision "shell" do |s|
     s.path = "install-xnat.sh"
     s.args = ["/vagrant", "vagrant", "vagrant", "/var/lib/XNAT", "false"]
