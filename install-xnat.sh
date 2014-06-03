@@ -6,12 +6,13 @@ GROUP=$3
 XNAT_DATA=$4
 EXT=$5
 
-if [ ! -f $DEPS/apache-tomcat-7.0.53.tar.gz ]; then
+TOMCAT_VERSION=7.0.54
+if [ ! -f $DEPS/apache-tomcat-$TOMCAT_VERSION.tar.gz ]; then
 	cd $DEPS
-	curl -O http://www.mirrorservice.org/sites/ftp.apache.org/tomcat/tomcat-7/v7.0.53/bin/apache-tomcat-7.0.53.tar.gz
+	curl -O http://www.mirrorservice.org/sites/ftp.apache.org/tomcat/tomcat-7/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz
 fi
-tar xf $DEPS/apache-tomcat-7.0.53.tar.gz -C /opt
-TOMCAT_HOME=/opt/apache-tomcat-7.0.53
+tar xf $DEPS/apache-tomcat-$TOMCAT_VERSION.tar.gz -C /opt
+TOMCAT_HOME=/opt/apache-tomcat-$TOMCAT_VERSION
 
 if [ ! -f $DEPS/xnat-1.6.3.tar.gz ]; then 
 	cd $DEPS
