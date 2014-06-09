@@ -1,12 +1,13 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 DEPS=$1
 OWNER=$2
 XNAT_DATA=$3
 EXT=$4
 
-DBUSER=$OWNER
-DBPASS=xnat01
+DB_NAME=xnat
+DB_USER=$OWNER
+DB_PASS=xnat
 
 sudo adduser --system --no-create-home $OWNER
 
@@ -32,15 +33,15 @@ ln -s $DEPS/build.properties $XNAT_HOME
 apt-get update
 
 apt-get -y install postgresql-9.3
-sudo -u postgres psql -c "CREATE ROLE $DBUSER PASSWORD '$DBPASS' NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;"
-sudo -u postgres createdb -O $DBUSER xnat
+sudo -u postgres psql -c "CREATE ROLE $DB_USER PASSWORD '$DB_PASS' NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;"
+sudo -u postgres createdb -O $DB_USER $DB_NAME
 
 apt-get install -y openjdk-7-jdk
 export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
 
 cd $XNAT_HOME
 bin/setup.sh -Ddeploy=true
-sudo -u $OWNER psql -d xnat <$XNAT_HOME/deployments/xnat/sql/xnat.sql
+sudo -u $OWNER psql -d $DB_NAME <$XNAT_HOME/deployments/xnat/sql/xnat.sql
 
 cd $XNAT_HOME/deployments/xnat
 $XNAT_HOME/bin/StoreXML -l security/security.xml -allowDataDeletion true
@@ -52,7 +53,7 @@ if [ "$EXT" = "true" ]; then
 	cp -r $DEPS/src $XNAT_HOME/projects/xnat
 	cd $XNAT_HOME
 	bin/update.sh -Ddeploy=true
-	sudo -u $OWNER psql -d xnat <$XNAT_HOME/deployments/xnat/sql/xnat-update.sql
+	sudo -u $OWNER psql -d $DB_NAME <$XNAT_HOME/deployments/xnat/sql/xnat-update.sql
 fi
 
 chown -R $OWNER $XNAT_HOME $TOMCAT_HOME $XNAT_DATA
