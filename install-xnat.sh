@@ -46,6 +46,7 @@ $XNAT_HOME/bin/StoreXML -dir ./work/field_groups -u admin -p admin -allowDataDel
 if [ "$EXT" = "true" ]; then
 	test -f $XNAT_HOME/projects/xnat/src/schemas/ext/ext.xsd
 	sed -i 's/<!--\(<Data_Model .*\/>\)-->/\1/' $XNAT_HOME/projects/xnat/InstanceSettings.xml
+	cp -r $DEPS/src $XNAT_HOME/projects/xnat
 	cd $XNAT_HOME
 	bin/update.sh -Ddeploy=true
 	psql -d xnat -f $XNAT_HOME/deployments/xnat/sql/xnat-update.sql -U xnat01
