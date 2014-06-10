@@ -2,9 +2,8 @@
 
 DEPS=$1
 OWNER=$2
-GROUP=$3
-XNAT_DATA=$4
-EXT=$5
+XNAT_DATA=$3
+EXT=$4
 
 TOMCAT_VERSION=7.0.54
 if [ ! -f $DEPS/apache-tomcat-$TOMCAT_VERSION.tar.gz ]; then
@@ -52,7 +51,7 @@ if [ "$EXT" = "true" ]; then
 	psql -d xnat -f $XNAT_HOME/deployments/xnat/sql/xnat-update.sql -U xnat01
 fi
 
-chown -R $OWNER.$GROUP $XNAT_HOME $TOMCAT_HOME $XNAT_DATA
+chown -R $OWNER $XNAT_HOME $TOMCAT_HOME $XNAT_DATA
 
 RULENUM=$(iptables -L INPUT --line-numbers | grep 'REJECT' | awk '{print $1}')
 iptables -I INPUT $RULENUM -m state --state NEW -m tcp -p tcp --dport 8080 -j ACCEPT
