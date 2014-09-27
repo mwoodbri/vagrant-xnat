@@ -1,6 +1,10 @@
 XNAT setup with Vagrant
 =======================
 
+
+**This script is unmaintained: please try https://github.com/brainstorm/ansible-xnat**
+
+
 To automatically setup XNAT:
 
 1. Install [Vagrant](http://www.vagrantup.com/)
